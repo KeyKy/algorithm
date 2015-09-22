@@ -1,0 +1,2 @@
+Fruit{apple{shape,color},shape{taste,shape,price}}
+Fruit
