@@ -44,7 +44,7 @@ int main(){
 		for(int i = 0; i < N; i++){
 			cin >> a[i];
 		}
-		mergeSort(a, 0, 9);
+		mergeSort(a, 0, N-1);
 		for(int i = 0; i < N-1; i++){
 			cout << a[i] << ' ';
 		}
