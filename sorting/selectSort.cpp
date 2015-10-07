@@ -1,7 +1,7 @@
 #include <iostream>
 
 void selectSort(int a[], int n){
-	for(int i = 0; i < n; i++){
+	for(int i = 0; i < n-1; i++){
 		int min = a[i], idx = i;
 		for(int j = i+1; j < n; j++){
 			if(a[j] < min){
@@ -9,9 +9,8 @@ void selectSort(int a[], int n){
 				idx = j;
 			}
 		}
-		int tmp = a[i];
-		a[i] = a[idx];
-		a[idx] = tmp;
+		a[idx] = a[i];
+		a[i] = min;
 	}
 }
 
