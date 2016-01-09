@@ -1,6 +1,7 @@
-function [ ] = smoSolver( designMatrix, targetGroup )
+function [ model ] = smoSolver( designMatrix, targetGroup )
 numChanged = 0;
 examineAll = 1;
+tolerance = 0.001; total_runtimes = 5000;
 n_samps = size(designMatrix,1);
 kernelMatrix = zeros(n_samps, n_samps);
 for i = 1 : n_samps
@@ -9,7 +10,7 @@ for i = 1 : n_samps
         kernelMatrix(j,i) =  kernelMatrix(i,j);
     end
 end
-alphaArray = zeros(1, n_samps);
+alphaArray = rand(1, n_samps);
 C = 1; b = 0;
 u = alphaArray .* targetGroup * kernelMatrix - b;
 E = u - targetGroup;
@@ -22,7 +23,7 @@ while(numChanged > 0 || examineAll)
         end
     else
         for i = 1 : n_samps
-            if abs(alphaArray(i)) > 0.01 && abs(alphaArray(i)-C) > 0.01
+            if abs(alphaArray(i)) > tolerance && abs(alphaArray(i)-C) > tolerance
                 numChanged = numChanged + examineExample(i);
             end
         end
@@ -33,10 +34,7 @@ while(numChanged > 0 || examineAll)
         examineAll = 1;
     end
     iter = iter + 1;
-    if iter > 2000
-        ii = 1;
-    end
-    if iter > 5000
+    if iter > total_runtimes
         break;
     end
 end
@@ -46,7 +44,10 @@ function changed = examineExample(i)
     alpha2 = alphaArray(i);
     E2 = E(i);
     r2 = E2 * y2;
-    if((r2 < -0.01 && alpha2 < C) || (r2 > 0.01 && alpha2 > 0))
+    %if((r2 < -0.01 && alpha2 < C) || (r2 > 0.01 && alpha2 > 0))
+    if( (r2 < -tolerance && abs(alpha2) < tolerance) || ...
+         (r2 > tolerance && abs(alpha2-C) < tolerance) || ...
+         (abs(r2) > tolerance && alpha2 < C-tolerance && alpha2 > tolerance ) )
         non_zero_non_c = find(abs(alphaArray)>0.01 & abs(alphaArray-C)>0.01);
         if length(non_zero_non_c) > 1
             maxIdx = 1; max = 0;
@@ -153,5 +154,10 @@ tf = 1; return;
 end
 
 u = alphaArray .* targetGroup * kernelMatrix - b;
-E = u - targetGroup;
+alphaIdx = find(abs(alphaArray) > tolerance); 
+model.targetGroup = targetGroup(alphaIdx);
+model.alpha = alphaArray(alphaIdx);
+model.supVec = designMatrix(alphaIdx, :);
+model.b = b;
+
 end
